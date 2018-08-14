@@ -76,6 +76,8 @@ Author's Notes:
 		7. The configuration of the SQL database is SQLAlchemy. I know that Ian
 	wanted Postgress. It should be easy to change the app.config in the python
 	api.py file in order to change this configuration.
+		8. You will need to download 'react-native-signature-capture' from this link:
+	https://github.com/RepairShopr/react-native-signature-capture
 
 	I would like to acknowledge a few people in the creation of this
 	application: 
