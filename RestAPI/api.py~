@@ -1,0 +1,135 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+import os
+
+app = Flask(__name__)
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'crud.sqlite')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+
+# Bind the SQLAlchemy and Marshmallow
+class Trip(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    company = db.Column(db.String(80), unique = True)
+    vehicle = db.Column(db.String(120), unique = True)
+    driver = db.Column(db.String(120), unique = True)
+    start_date = db.Column(db.Integer, unique = True)
+    start_time = db.Column(db.String(120), unique = True)
+    departure = db.Column(db.String(120), unique = True)
+    start_mileage = db.Column(db.Integer, unique = True)
+    end_date = db.Column(db.Integer, unique = True)
+    end_time = db.Column(db.String(120), unique = True)
+    destination = db.Column(db.String(120), unique = True)
+    end_mileage = db.Column(db.Integer, unique = True)
+    client = db.Column(db.String(120), unique = True)
+    status = db.Column(db.String(120), unique = True)
+
+    def __init__(self, company, vehicle, driver, start_date, start_time, departure, start_mileage,client, end_date=0, end_time='', destination='', end_mileage=-1, status = 'In Progress'):
+        self.company = company
+        self.vehicle = vehicle
+        self.driver = driver
+        self.start_date = start_date
+        self.start_time = start_time
+        self.departure = departure
+        self.start_mileage = start_mileage
+        self.client = client
+
+
+class TripSchema(ma.Schema):
+    class Meta:
+        fields = ('company','vehicle','driver','start_date','start_time','departure','start_mileage','end_date','end_time','destination','end_mileage','client', 'status')
+
+trip_schema = TripSchema()
+trips_schema = TripSchema(many = True)
+
+
+
+# Endpoint to create new trips
+@app.route("/trip", methods = ["POST"])
+def add_trip():
+    # Start info
+    company = request.json['company']
+    vehicle = request.json['vehicle']
+    driver = request.json['driver']
+    start_date = request.json['start_date']
+    start_time = request.json['start_time']
+    departure = request.json['departure']
+    start_mileage = request.json['start_mileage']
+    client = request.json['client']
+    
+
+    new_trip = Trip(company, vehicle, driver, start_date, start_time, departure, start_mileage, client)
+
+    db.session.add(new_trip)
+    db.session.commit()
+
+    return trip_schema.jsonify(new_trip)
+
+# Endpoint to show all trips
+@app.route("/trip", methods = ["GET"])
+def get_trips():
+    all_trips = Trip.query.all()
+    result = trips_schema.dump(all_trips)
+    return jsonify(result.data)
+
+# Endpoint to get trip detail by id
+@app.route("/trip/<id>", methods = ["GET"])
+def trip_detail(id):
+    trip = Trip.query.get(id)
+    return trip_schema.jsonify(trip)
+
+# Endpoint to update trip
+@app.route("/trip/<id>", methods = ["PUT"])
+def trip_update(id):
+    trip = Trip.query.get(id)
+    company = request.json['company']
+    vehicle = request.json['vehicle']
+    driver = request.json['driver']
+    start_date = request.json['start_date']
+    start_time = request.json['start_time']
+    departure = request.json['departure']
+    start_mileage = request.json['start_mileage']
+    client = request.json['client']
+    end_date = request.json['end_date']
+    end_time = request.json['end_time']
+    destination = request.json['destination']
+    end_mileage = request.json['end_mileage']
+    status = request.json['status']
+
+    trip.company = company
+    trip.vehicle = vehicle
+    trip.driver = driver
+    trip.start_date = start_date
+    trip.start_time = start_time
+    trip.departure = departure
+    trip.start_mileage = start_mileage
+    trip.client = client
+    trip.end_date = end_date
+    trip.end_time = end_time
+    trip.destination = destination
+    trip.end_mileage = end_mileage
+    trip.status = status
+
+    db.session.commit()
+    return trip_schema.jsonify(trip)
+
+# Endpoint to delete trip
+@app.route("/trip/<id>", methods = ["DELETE"])
+def user_delete(id):
+    trip = Trip.query.get(id)
+
+    
+    db.session.delete(trip)
+    db.session.commit()
+    
+    return trip_schema.jsonify(trip)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
