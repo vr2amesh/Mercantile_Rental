@@ -38,6 +38,9 @@ Server Development:
 
 App Development:
 
+	This repository is to be used in a "react-native init" initialized
+	React Native project.
+
 	In order to create the UI (user interface), I used the Facebook created 
 	React Native. It allows me to create both an IOS and Android version of 
 	this application. The initial starting state of this current project
